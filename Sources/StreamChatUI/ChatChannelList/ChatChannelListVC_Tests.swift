@@ -59,10 +59,8 @@ class ChatChannelListVC_Tests: XCTestCase {
     }
 
     func test_emptyAppearance() {
-        mockedChannelListController.simulateInitial(
-            channels: [],
-            state: .remoteDataFetched
-        )
+        vc.executeLifecycleMethods()
+        mockedChannelListController.simulate(state: .remoteDataFetched)
         AssertSnapshot(vc, isEmbeddedInNavigationController: true)
     }
     
@@ -95,6 +93,12 @@ class ChatChannelListVC_Tests: XCTestCase {
             channels: [channelWithLastMessageDeleted],
             changes: []
         )
+        AssertSnapshot(vc, isEmbeddedInNavigationController: true)
+    }
+
+    func test_errorAppearance() {
+        vc.executeLifecycleMethods()
+        mockedChannelListController.simulate(state: .localDataFetchFailed(ClientError()))
         AssertSnapshot(vc, isEmbeddedInNavigationController: true)
     }
 
