@@ -1484,14 +1484,22 @@ private class TestEnvironment {
     
     lazy var controllerEnvironment: ChatMessageController
         .Environment = .init(
-            messageObserverBuilder: { [unowned self] in
-                self.messageObserver = .init(context: $0, fetchRequest: $1, itemCreator: $2, fetchedResultsControllerType: $3)
-                self.messageObserver.synchronizeError = self.messageObserver_synchronizeError
-                return self.messageObserver!
+            messageObserverBuilder: { [weak self] in
+                let messageObserver = EntityDatabaseObserverMock<ChatMessage, MessageDTO>(
+                    context: $0,
+                    fetchRequest: $1,
+                    itemCreator: $2,
+                    fetchedResultsControllerType: $3
+                )
+                self?.messageObserver = messageObserver
+                messageObserver.synchronizeError = self?.messageObserver_synchronizeError
+                return messageObserver
             },
-            messageUpdaterBuilder: { [unowned self] in
-                self.messageUpdater = MessageUpdaterMock(database: $0, apiClient: $1)
-                return self.messageUpdater
+
+            messageUpdaterBuilder: { [weak self] in
+                let messageUpdater = MessageUpdaterMock(database: $0, apiClient: $1)
+                self?.messageUpdater = messageUpdater
+                return messageUpdater
             }
         )
 }

@@ -254,8 +254,8 @@ private extension InternetConnection {
             
             do {
                 reachability = try Reachability()
-                reachability?.whenReachable = { [unowned self] in self.updateStatus(with: $0) }
-                reachability?.whenUnreachable = { [unowned self] in self.updateStatus(with: $0) }
+                reachability?.whenReachable = { [weak self] in self?.updateStatus(with: $0) }
+                reachability?.whenUnreachable = { [weak self] in self?.updateStatus(with: $0) }
             } catch {
                 log.error(error)
             }

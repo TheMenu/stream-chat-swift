@@ -272,7 +272,13 @@ public class ChatChannelController: DataController, DelegateCallable, DataStoreP
     }
 
     private func setChannelObserver() {
-        _channelObserver.computeValue = { [unowned self] in
+        _channelObserver.computeValue = { [weak self] in
+            
+            guard let self = self else {
+                log.warning("Callback called while self is nil")
+                return nil
+            }
+
             guard let cid = self.cid else { return nil }
             let observer = EntityDatabaseObserver(
                 context: self.client.databaseContainer.viewContext,
@@ -292,7 +298,11 @@ public class ChatChannelController: DataController, DelegateCallable, DataStoreP
     }
 
     private func setMessagesObserver() {
-        _messagesObserver.computeValue = { [unowned self] in
+        _messagesObserver.computeValue = { [weak self] in
+            guard let self = self else {
+                log.warning("Callback called while self is nil")
+                return nil
+            }
             guard let cid = self.cid else { return nil }
             let sortAscending = self.messageOrdering == .topToBottom ? false : true
             var deletedMessageVisibility: ChatClientConfig.DeletedMessageVisibility?
@@ -408,7 +418,11 @@ public class ChatChannelController: DataController, DelegateCallable, DataStoreP
         guard let webSocketClient = client.webSocketClient else { return }
         let center = webSocketClient.eventNotificationCenter
         eventObservers = [
-            MemberEventObserver(notificationCenter: center, cid: cid) { [unowned self] event in
+            MemberEventObserver(notificationCenter: center, cid: cid) { [weak self] event in
+                guard let self = self else {
+                    log.warning("Callback called while self is nil")
+                    return
+                }
                 self.delegateCallback {
                     $0.channelController(self, didReceiveMemberEvent: event)
                 }

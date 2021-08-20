@@ -479,23 +479,26 @@ private class TestEnvironment {
     @Atomic var memberListObserver: ListDatabaseObserverMock<ChatChannelMember, MemberDTO>?
     @Atomic var memberListObserverSynchronizeError: Error?
     
-    lazy var environment: ChatChannelMemberListController.Environment = .init(
-        memberListUpdaterBuilder: { [unowned self] in
-            self.memberListUpdater = .init(
+    lazy var environment: ChatChannelMemberListController.Environment =
+        .init(memberListUpdaterBuilder: { [weak self] in
+            let memberListUpdater = ChannelMemberListUpdaterMock(
                 database: $0,
                 apiClient: $1
             )
-            return self.memberListUpdater!
+            self?.memberListUpdater = memberListUpdater
+            return memberListUpdater
         },
-        memberListObserverBuilder: { [unowned self] in
-            self.memberListObserver = .init(
+
+        memberListObserverBuilder: { [weak self] in
+            let memberListObserver = ListDatabaseObserverMock<ChatChannelMember, MemberDTO>(
                 context: $0,
                 fetchRequest: $1,
                 itemCreator: $2,
                 fetchedResultsControllerType: $3
             )
-            self.memberListObserver?.synchronizeError = self.memberListObserverSynchronizeError
-            return self.memberListObserver!
+            self?.memberListObserver = memberListObserver
+            memberListObserver.synchronizeError = self?.memberListObserverSynchronizeError
+            return memberListObserver
         }
     )
 }
