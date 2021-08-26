@@ -20,7 +20,9 @@ extension JSONDecoder {
             var dateString: String = try container.decode(String.self)
             
             if !dateString.contains(".") {
-                dateString.removeLast()
+                if !dateString.isEmpty {
+                    dateString.removeLast()
+                }
                 dateString.append(".0Z")
             }
             
